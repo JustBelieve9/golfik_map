@@ -143,8 +143,9 @@
   .gframe{fill:rgba(255,255,255,.014);stroke:var(--line);stroke-width:1;stroke-dasharray:3,4}
   .xlink{fill:none;stroke:var(--coral);stroke-width:1.2;stroke-dasharray:3,3;opacity:.14}
   .xlink.on{opacity:.95;stroke-width:1.8}
-  .gnode{cursor:grab}
-  .gnode:active{cursor:grabbing}
+  .gnode{cursor:pointer}
+  .gnode.draggable{cursor:grab}
+  .gnode.draggable:active{cursor:grabbing}
   .gnode rect{stroke-width:1.2}
   .gnode text{font-family:var(--mono);pointer-events:none;user-select:none}
   .faded{opacity:.38}
@@ -190,71 +191,11 @@
     /* нижние плавающие элементы — не под системным индикатором дома на iPhone */
     .zoombar{bottom:calc(14px + env(safe-area-inset-bottom))}
     body{padding-bottom:env(safe-area-inset-bottom)}
-
-    /* режим редактирования: колонка подписи уже, чтобы осталось место под значение */
-    .editing .field{grid-template-columns:88px 1fr 18px;gap:6px}
   }
   @media(max-width:640px) and (pointer:coarse){
     /* iOS открывает свой зум страницы на инпутах с шрифтом мельче 16px — держим 16px везде на тач-экранах */
     input, textarea, select{font-size:16px!important}
   }
-
-  /* ---------- режим редактирования ---------- */
-  #btnEdit.on{background:var(--amber);color:var(--bg);border-color:var(--amber)}
-  .editing .field{display:grid;grid-template-columns:118px 1fr 20px;gap:8px;align-items:center}
-  .field input, .field textarea{
-    font-family:var(--sans);font-size:12.5px;color:var(--text);background:var(--bg);
-    border:1px solid var(--line);padding:4px 7px;width:100%;font:inherit;border-radius:4px
-  }
-  .field input.num, .field textarea.num{font-family:var(--mono);font-size:12px}
-  .field input[type=color]{width:44px;height:28px;padding:2px;border:1px solid var(--line);
-    background:none;cursor:pointer;border-radius:4px}
-  .field .rmf{cursor:pointer;color:var(--dim);font-family:var(--mono);font-size:14px;
-              align-self:center;text-align:center}
-  .field .rmf:hover{color:var(--coral)}
-  .addfield{display:flex;gap:6px;padding:10px 20px;border-top:1px solid var(--line-soft)}
-  .addfield input{flex:1;font-family:var(--sans);font-size:12px;border:1px solid var(--line);
-                   padding:6px 8px;background:var(--bg);color:var(--text);border-radius:4px}
-  .addfield button{font-family:var(--mono);font-size:10.5px;border:1px solid var(--line);
-                    background:var(--bg-soft);color:var(--dim);padding:6px 11px;cursor:pointer;
-                    border-radius:14px}
-  .addfield button:hover{border-color:var(--amber);color:var(--text)}
-  .titleedit{
-    font-family:inherit;font-size:16px;font-weight:650;color:var(--text);
-    background:var(--bg);border:1px solid var(--line);width:100%;padding:6px 8px;
-    margin-bottom:13px;resize:vertical;border-radius:4px
-  }
-  .nodeactions{padding:14px 20px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .nodeactions .btn.danger:hover{border-color:var(--coral);color:var(--coral)}
-  .addchild{
-    margin:12px 20px 0;padding:11px;border:1px dashed var(--line);display:flex;gap:6px;flex-wrap:wrap
-  }
-  .addchild input{flex:1;min-width:120px;font-family:var(--sans);font-size:11.5px;
-    border:1px solid var(--line);border-radius:4px;padding:6px 8px;background:var(--bg);color:var(--text)}
-
-  /* ---------- модалка «новый узел» ---------- */
-  .modal-overlay{
-    position:fixed;inset:0;background:rgba(8,9,11,.62);z-index:100;
-    display:none;align-items:center;justify-content:center;backdrop-filter:blur(1px)
-  }
-  .modal-overlay.show{display:flex}
-  .modal-box{
-    background:var(--bg-panel);border:1px solid var(--line);border-radius:9px;
-    padding:20px;width:360px;max-width:90vw;box-shadow:0 12px 40px rgba(0,0,0,.4)
-  }
-  .modal-title{font-size:15px;font-weight:650;color:var(--text);margin-bottom:15px}
-  .mf{margin-bottom:13px}
-  .mf label{display:block;font-family:var(--mono);font-size:9.5px;color:var(--dim);
-            text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
-  .mf input{
-    width:100%;font-family:var(--sans);font-size:13px;color:var(--text);background:var(--bg);
-    border:1px solid var(--line);padding:7px 9px;border-radius:4px
-  }
-  .mf input[type=color]{width:48px;height:30px;padding:2px;cursor:pointer}
-  .mf .colorrow{display:flex;align-items:center;gap:10px}
-  .mf .colorrow label.chk{display:flex;align-items:center;gap:6px;font-family:var(--sans);
-    font-size:11.5px;color:var(--dim);text-transform:none;letter-spacing:0;cursor:pointer}
-  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:17px}
 </style>
 </head>
 <body>
@@ -271,11 +212,6 @@
       </div>
       <button class="btn" id="btnFit">Вся карта</button>
       <button class="btn" id="btnClear">Сбросить</button>
-      <button class="btn" id="btnEdit">Редактировать</button>
-      <button class="btn" id="btnConnect" style="display:none">Подключить файл</button>
-      <button class="btn" id="btnNewNode" style="display:none">+ Новый узел</button>
-      <button class="btn" id="btnSave" style="display:none">Сохранить</button>
-      <span id="saveStatus" style="font-family:var(--mono);font-size:10px;color:var(--dim)"></span>
     </div>
   </header>
 
@@ -295,31 +231,6 @@
     <button class="btn" id="panelHandle" title="Показать панель">‹</button>
   </main>
 
-<div class="modal-overlay" id="newNodeModal">
-  <div class="modal-box">
-    <div class="modal-title">Новый узел</div>
-    <div class="mf">
-      <label>Родитель</label>
-      <input id="nnParent" list="nnParentList" placeholder="начни печатать название раздела…">
-      <datalist id="nnParentList"></datalist>
-    </div>
-    <div class="mf">
-      <label>Название</label>
-      <input id="nnLabel" placeholder="например, «Тормозной шланг»">
-    </div>
-    <div class="mf">
-      <label>Цвет узла</label>
-      <div class="colorrow">
-        <input type="color" id="nnColor" value="#6ea8d8" disabled>
-        <label class="chk"><input type="checkbox" id="nnColorAuto" checked> взять цвет раздела автоматически</label>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn" id="nnCancel">Отмена</button>
-      <button class="btn" id="nnCreate">Создать</button>
-    </div>
-  </div>
-</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
@@ -598,18 +509,25 @@ function addText(d){
   this.__txt = true;
 }
 
+// Свободно двигать можно только «крупные» узлы верхнего уровня: сам автомобиль
+// и его 7 прямых разделов. Всё, что глубже, двигать нельзя — так проще
+// ориентироваться, когда карту открывают просто посмотреть.
+const DRAGGABLE_IDS = new Set(["car", ...CATS]);
+
 const DRAG_THRESHOLD_PX = 6;       // мышь: сколько экранных пикселей до перетаскивания
 const DRAG_THRESHOLD_TOUCH_PX = 12; // палец менее точен — порог выше, чтобы обычный тап не улетал в drag
 
 let dragMoved = false;
 const nodeDrag = d3.drag()
   .on("start", function(e,d){
+    if(!DRAGGABLE_IDS.has(d.id)) return;
     dragMoved = false;
     const p = pos.get(d.id);
     const isTouch = e.sourceEvent && (e.sourceEvent.pointerType === "touch" || e.sourceEvent.type === "touchstart");
     this.__grab = { ox: p.x - e.x, oy: p.y - e.y, sx: e.x, sy: e.y, armed:false, isTouch };
   })
   .on("drag", function(e,d){
+    if(!DRAGGABLE_IDS.has(d.id)) return;
     const g = this.__grab;
     if(!g.armed){
       const k = d3.zoomTransform(gsvg.node()).k;
@@ -626,12 +544,11 @@ const nodeDrag = d3.drag()
     d3.select(this).attr("transform", `translate(${nx},${ny})`);
   })
   .on("end", function(e,d){
-    if(!dragMoved) return;
+    if(!DRAGGABLE_IDS.has(d.id) || !dragMoved) return;
     const p = pos.get(d.id);
     const baseX = p.x - (d.n.dx||0), baseY = p.y - (d.n.dy||0);
     d.n.dx = this.__liveX - baseX;
     d.n.dy = this.__liveY - baseY;
-    markDirty();
     draw();
   });
 
@@ -647,7 +564,7 @@ function render(){
   const ns = gNodes.selectAll("g.gnode").data(NODEBOX.filter(hit), d=>d.id);
   ns.exit().remove();
   const en = ns.enter().append("g")
-    .attr("class",d=>"gnode t-"+d.n.type)
+    .attr("class",d=>"gnode t-"+d.n.type + (DRAGGABLE_IDS.has(d.id)?" draggable":""))
     .attr("transform",d=>{ const p=pos.get(d.id); return `translate(${p.x},${p.y})`; })
     .call(nodeDrag)
     .on("click",(e,d)=>{
@@ -812,69 +729,14 @@ function showNode(id){
   const cr = crossOf.get(id) || [];
 
   let h = crumbHTML(id);
-  h += `<div class="ptype">${TYPE_RU[n.type]||n.type}</div>`;
-  if(editMode){
-    h += `<textarea class="titleedit" id="titleEdit" rows="2">${esc(n.label)}</textarea>`;
-  } else {
-    h += `<h2>${flat(n.label)}</h2>`;
-  }
-
-  if(editMode && id!=='car'){
-    const curColor = n.color || strokeOf(n);
-    h += `<div class="field" style="display:grid;grid-template-columns:118px 1fr;gap:8px;align-items:center">
-            <div class="k">Цвет узла</div>
-            <div class="v" style="display:flex;align-items:center;gap:9px">
-              <input type="color" id="colorPicker" value="${curColor}">
-              ${n.color
-                ? `<span class="tg" id="colorReset">сбросить к цвету раздела</span>`
-                : `<span style="font-size:11px;color:var(--dim)">сейчас — по разделу</span>`}
-            </div>
-          </div>`;
-  }
+  h += `<div class="ptype">${TYPE_RU[n.type]||n.type}</div><h2>${flat(n.label)}</h2>`;
 
   Object.entries(n.meta||{}).forEach(([k,v])=>{
-    if(!editMode && !v) return;
-    if(editMode){
-      const isNum = /^(Артикул|Номер детали|Номер детали \(АО\)|Номер детали \(железо\)|Момент затяжки \/ примечание|Номинал|Блок №|Адрес блока)$/.test(k);
-      const multiline = (v||"").includes("\n") || (v||"").length > 58;
-      h += `<div class="field"><div class="k">${esc(k)}</div><div class="v">`
-         + (multiline
-            ? `<textarea data-meta="${esc(k)}" rows="2" class="${isNum?'num':''}">${esc(v)}</textarea>`
-            : `<input data-meta="${esc(k)}" class="${isNum?'num':''}" value="${esc(v)}">`)
-         + `</div><div class="rmf" data-rmf="${esc(k)}" title="Удалить поле">×</div></div>`;
-    } else {
-      const warn = (k==="Достоверность" && n.verified===false);
-      h += `<div class="field"><div class="k">${esc(k)}</div>`
-         + `<div class="v"${warn?' style="color:#e8a33d"':''}>${esc(v)}</div></div>`;
-    }
+    if(!v) return;
+    const warn = (k==="Достоверность" && n.verified===false);
+    h += `<div class="field"><div class="k">${esc(k)}</div>`
+       + `<div class="v"${warn?' style="color:#e8a33d"':''}>${esc(v)}</div></div>`;
   });
-
-  if(editMode){
-    h += `<div class="addfield">
-            <input id="newFieldKey" placeholder="название поля">
-            <input id="newFieldVal" placeholder="значение">
-            <button id="addFieldBtn">Добавить поле</button>
-          </div>`;
-    if(n.type==='part'){
-      h += `<div class="field"><div class="k">Сверено</div><div class="v">
-              <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
-                <input type="checkbox" id="verifiedChk" ${n.verified?'checked':''}>
-                ${n.verified?'сверено с CarPort':'со скриншота, не сверено'}
-              </label></div></div>`;
-    }
-    h += `<div class="nodeactions">`;
-    if(id!=='car'){
-      h += `<button class="btn danger" id="delNodeBtn">Удалить${ch.length ? " (и "+ch.length+" вложенных)" : ""}</button>`;
-    }
-    if(n.dx || n.dy){
-      h += `<span class="tg" id="posReset">вернуть на автоматическое место</span>`;
-    }
-    h += `</div>
-      <div class="addchild">
-        <input id="newChildLabel" placeholder="название нового дочернего узла">
-        <button class="btn" id="addChildBtn">Добавить внутрь «${flat(n.label)}»</button>
-      </div>`;
-  }
 
   // ---- папочная навигация ----
   h += `<div class="navsec"><div class="lt"><span>Внутри${ch.length?" · "+ch.length:""}</span>`;
@@ -947,59 +809,6 @@ function showNode(id){
     showNode(t);
   });
 
-  if(editMode){
-    const title = document.getElementById("titleEdit");
-    if(title) title.addEventListener("change", e=>{
-      n.label = e.target.value; markDirty(); draw(); showNode(id);
-    });
-    el.querySelectorAll("[data-meta]").forEach(inp=>{
-      inp.addEventListener("input", e=>{
-        const k = e.target.dataset.meta;
-        n.meta[k] = e.target.value;
-        if(k==="Артикул" && n.type==='part') n.art = e.target.value.replace(/\s+/g,"");
-        markDirty();
-      });
-    });
-    el.querySelectorAll("[data-rmf]").forEach(x=>x.addEventListener("click", e=>{
-      e.stopPropagation();
-      delete n.meta[x.dataset.rmf];
-      markDirty(); showNode(id);
-    }));
-    const addFieldBtn = document.getElementById("addFieldBtn");
-    if(addFieldBtn) addFieldBtn.onclick = e=>{
-      e.stopPropagation();
-      const k = document.getElementById("newFieldKey").value.trim();
-      const v = document.getElementById("newFieldVal").value.trim();
-      if(!k) return;
-      n.meta[k] = v; markDirty(); showNode(id);
-    };
-    const chk = document.getElementById("verifiedChk");
-    if(chk) chk.addEventListener("change", e=>{
-      n.verified = e.target.checked; markDirty(); draw(); showNode(id);
-    });
-    const colorPicker = document.getElementById("colorPicker");
-    if(colorPicker) colorPicker.addEventListener("input", e=>{
-      n.color = e.target.value; markDirty(); branchCache.clear(); draw();
-    });
-    const colorReset = document.getElementById("colorReset");
-    if(colorReset) colorReset.addEventListener("click", e=>{
-      e.stopPropagation(); delete n.color; markDirty(); branchCache.clear(); draw(); showNode(id);
-    });
-    const posReset = document.getElementById("posReset");
-    if(posReset) posReset.addEventListener("click", e=>{
-      e.stopPropagation(); delete n.dx; delete n.dy; markDirty(); draw(); showNode(id);
-    });
-    const delBtn = document.getElementById("delNodeBtn");
-    if(delBtn) delBtn.onclick = e=>{ e.stopPropagation(); deleteNode(id); };
-    const addChildBtn = document.getElementById("addChildBtn");
-    if(addChildBtn) addChildBtn.onclick = e=>{
-      e.stopPropagation();
-      const lbl = document.getElementById("newChildLabel").value.trim();
-      if(!lbl) return;
-      addChildTo(id, lbl);
-    };
-  }
-
   el.scrollTop = 0;
   scrollPanelIntoViewOnMobile();
 }
@@ -1011,173 +820,6 @@ function scrollPanelIntoViewOnMobile(){
     try{ cs.scrollIntoView({behavior:"smooth", block:"start"}); }catch(e){}
   }
 }
-
-/* ============ редактирование ============ */
-let editMode = false, fileHandle = null, dirty = false;
-
-function setStatus(t){ const el=document.getElementById("saveStatus"); if(el) el.textContent = t; }
-function markDirty(){ dirty = true; setStatus("есть несохранённые изменения"); }
-
-function rebuildIndices(){
-  byId.clear(); GRAPH.nodes.forEach(n=>byId.set(n.id,n));
-  kids.clear();
-  GRAPH.nodes.forEach(n=>{
-    if(n.parent){ if(!kids.has(n.parent)) kids.set(n.parent,[]); kids.get(n.parent).push(n.id); }
-  });
-  crossOf.clear();
-  GRAPH.links.filter(l=>l.kind==='cross').forEach(l=>{
-    if(!crossOf.has(l.source)) crossOf.set(l.source,[]);
-    if(!crossOf.has(l.target)) crossOf.set(l.target,[]);
-    crossOf.get(l.source).push({other:l.target,label:l.label});
-    crossOf.get(l.target).push({other:l.source,label:l.label});
-  });
-  branchCache.clear();
-}
-
-const DEFAULT_CHILD_TYPE = { part_bucket:"part", cat_mod:"mod", repair_group:"torque",
-  journal_bucket:"journal_item", jr_todo:"todo" };
-function childTypeFor(parentId){
-  const p = byId.get(parentId);
-  if(DEFAULT_CHILD_TYPE[parentId]) return DEFAULT_CHILD_TYPE[parentId];
-  if(DEFAULT_CHILD_TYPE[p.type]) return DEFAULT_CHILD_TYPE[p.type];
-  const ex = (kids.get(parentId)||[])[0];
-  if(ex) return byId.get(ex).type;
-  return "part";
-}
-
-function addChildTo(parentId, label, color){
-  const type = childTypeFor(parentId);
-  const id = "custom_" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-  const node = { id, label, type, parent: parentId, meta:{} };
-  if(color) node.color = color;
-  if(type==="part"){ node.meta["Артикул"]=""; node.meta["Наименование"]=label; node.verified=false; node.art=""; }
-  GRAPH.nodes.push(node);
-  GRAPH.links.push({source:parentId, target:id, kind:"tree", label:null});
-  rebuildIndices();
-  if(collapsed.has(parentId)) collapsed.delete(parentId);
-  markDirty(); draw(); selectNode(id, false);
-}
-
-/* ============ модалка «новый узел» — родитель, название, цвет ============ */
-function openNewNodeModal(){
-  const dl = document.getElementById("nnParentList");
-  dl.innerHTML = GRAPH.nodes
-    .filter(n=>n.type!=='pr_code')
-    .map(n=>`<option value="${esc(n.label.replace(/\n/g," "))}">`).join("");
-  const parentInput = document.getElementById("nnParent");
-  parentInput.value = selectedId ? byId.get(selectedId).label.replace(/\n/g," ") : "Golf 7.5 · 2019";
-  document.getElementById("nnLabel").value = "";
-  document.getElementById("nnColorAuto").checked = true;
-  document.getElementById("nnColor").disabled = true;
-  document.getElementById("nnColor").value = "#6ea8d8";
-  document.getElementById("newNodeModal").classList.add("show");
-  document.getElementById("nnLabel").focus();
-}
-function closeNewNodeModal(){ document.getElementById("newNodeModal").classList.remove("show"); }
-
-document.getElementById("btnNewNode").onclick = openNewNodeModal;
-document.getElementById("nnCancel").onclick = closeNewNodeModal;
-document.getElementById("newNodeModal").addEventListener("click", e=>{
-  if(e.target.id === "newNodeModal") closeNewNodeModal();
-});
-document.getElementById("nnColorAuto").addEventListener("change", e=>{
-  document.getElementById("nnColor").disabled = e.target.checked;
-});
-document.getElementById("nnCreate").onclick = ()=>{
-  const label = document.getElementById("nnLabel").value.trim();
-  if(!label){ document.getElementById("nnLabel").focus(); return; }
-  const pText = document.getElementById("nnParent").value.trim();
-  const labelToId = new Map(GRAPH.nodes.map(n=>[n.label.replace(/\n/g," "), n.id]));
-  const parentId = labelToId.get(pText) || selectedId || "car";
-  const auto = document.getElementById("nnColorAuto").checked;
-  const color = auto ? null : document.getElementById("nnColor").value;
-  addChildTo(parentId, label, color);
-  closeNewNodeModal();
-};
-
-function deleteNode(id){
-  if(id === "car"){ alert("Корневой узел удалить нельзя."); return; }
-  const n = byId.get(id);
-  const desc = descendants(id);
-  const label = n.label.replace(/\n/g," ");
-  const msg = desc.length
-    ? `Удалить «${label}» и всё вложенное — ${desc.length} узл(ов)? Это необратимо после сохранения.`
-    : `Удалить «${label}»? Это необратимо после сохранения.`;
-  if(!confirm(msg)) return;
-  const toRemove = new Set([id, ...desc]);
-  const parent = n.parent;
-  GRAPH.nodes = GRAPH.nodes.filter(x=>!toRemove.has(x.id));
-  GRAPH.links = GRAPH.links.filter(l=>!toRemove.has(l.source) && !toRemove.has(l.target));
-  rebuildIndices();
-  markDirty(); draw();
-  selectNode(parent || "car", false);
-}
-
-function toggleEditMode(){
-  editMode = !editMode;
-  const b = document.getElementById("btnEdit");
-  b.classList.toggle("on", editMode);
-  b.textContent = editMode ? "Готово" : "Редактировать";
-  document.getElementById("btnConnect").style.display = editMode ? "inline-block" : "none";
-  document.getElementById("btnSave").style.display = editMode ? "inline-block" : "none";
-  document.getElementById("btnNewNode").style.display = editMode ? "inline-block" : "none";
-  document.getElementById("detail").classList.toggle("editing", editMode);
-  if(!editMode) setStatus(dirty ? "есть несохранённые изменения" : "");
-  if(selectedId) showNode(selectedId); else showIntro();
-}
-
-function serializeGraph(){
-  const data = { nodes: GRAPH.nodes, links: GRAPH.links, pr: GRAPH.pr };
-  return "// Данные графа Golf 7.5 CZCA. Правится через кнопку «Сохранить» в golf_map.html,\n"
-       + "// либо руками — это обычный JS-объект.\nconst GRAPH = "
-       + JSON.stringify(data, null, 1) + ";\n";
-}
-
-function downloadFile(text){
-  const blob = new Blob([text], {type:"text/javascript"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = "golf_data.js";
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 2000);
-  dirty = false; setStatus("Скачано — замени golf_data.js рядом с golf_map.html");
-}
-
-async function connectFile(){
-  if(!window.showOpenFilePicker){
-    alert("Сохранение на месте работает только в Chrome и Edge на компьютере. Используй скачивание — кнопка «Сохранить» скачает файл.");
-    return;
-  }
-  try{
-    const [h] = await window.showOpenFilePicker({
-      types: [{ description:"Файл данных графа", accept:{ "text/javascript":[".js"] } }],
-      excludeAcceptAllOption: false, multiple:false
-    });
-    const perm = await h.requestPermission({mode:"readwrite"});
-    if(perm !== "granted"){ setStatus("Доступ на запись не предоставлен"); return; }
-    fileHandle = h;
-    document.getElementById("btnConnect").textContent = "Файл: " + h.name;
-    setStatus(dirty ? "есть несохранённые изменения" : "подключено, изменений нет");
-  }catch(e){ /* отменено пользователем */ }
-}
-
-async function saveToFile(){
-  const text = serializeGraph();
-  if(fileHandle){
-    try{
-      const w = await fileHandle.createWritable();
-      await w.write(text); await w.close();
-      dirty = false;
-      setStatus("Сохранено в " + fileHandle.name + " · " + new Date().toLocaleTimeString("ru-RU"));
-      return;
-    }catch(e){ setStatus("Не удалось записать: " + e.message + " — скачиваю файл"); }
-  }
-  downloadFile(text);
-}
-
-window.addEventListener("beforeunload", e=>{
-  if(dirty){ e.preventDefault(); e.returnValue = ""; }
-});
 
 function renderPr(q){
   q = (q||"").trim().toLowerCase();
@@ -1267,7 +909,6 @@ function fitAll(dur, maxK){
 function startView(){ fitAll(0, 1.15); }
 document.getElementById("btnFit").onclick = ()=>fitAll(500, 1.15);
 document.getElementById("btnClear").onclick = ()=>{ si.value=""; resetCollapse(); clearSel(); draw(); startView(); };
-document.getElementById("btnEdit").onclick = toggleEditMode;
 
 const colSide = document.getElementById("colSide");
 const panelHandle = document.getElementById("panelHandle");
@@ -1279,8 +920,6 @@ panelHandle.onclick = ()=>{
 colSide.addEventListener("transitionend", e=>{
   if(e.propertyName==="width" && !raf) raf = requestAnimationFrame(()=>{ raf=0; render(); });
 });
-document.getElementById("btnConnect").onclick = connectFile;
-document.getElementById("btnSave").onclick = saveToFile;
 document.getElementById("zIn").onclick = ()=>gsvg.transition().duration(200).call(zoom.scaleBy,1.35);
 document.getElementById("zOut").onclick = ()=>gsvg.transition().duration(200).call(zoom.scaleBy,1/1.35);
 
