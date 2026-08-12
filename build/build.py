@@ -2,8 +2,8 @@
 """Сборка справочника Golf 7.5 CZCA.
 
 Один источник данных -> два формата:
-  1. site/                  — многофайловая версия для GitHub Pages
-  2. site/golf-offline.html — одностраничная офлайн-версия для телефона
+  1. docs/                  — многофайловая версия для GitHub Pages (main:/docs)
+  2. docs/golf-offline.html — одностраничная офлайн-версия для телефона
 
 Запуск:  python3 build/build.py
 Опции:   --extract  заново вытащить GRAPH из golf_map_offline_LATEST.html
@@ -19,7 +19,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
-SITE = ROOT / "site"
+SITE = ROOT / "docs"
 ASSETS = SITE / "assets"
 FONTS = ASSETS / "fonts"
 
@@ -174,7 +174,7 @@ def main() -> None:
 
     print("данные   ", f"{stats['nodes']} узлов · {stats['links']} связей · "
                        f"{stats['fuses']} предохранителей · {stats['pr']} PR-кодов")
-    print("site/    ", f"{site_bytes / 1024:.0f} КБ (без офлайн-файла)")
+    print("docs/    ", f"{site_bytes / 1024:.0f} КБ (без офлайн-файла)")
     print("офлайн   ", f"{offline.relative_to(ROOT)} — {kb(offline)}")
     print("копия    ", f"golf-offline.html — {kb(ROOT / 'golf-offline.html')}")
 
