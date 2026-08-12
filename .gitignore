@@ -1,0 +1,7 @@
+.DS_Store
+.agents/
+.claude/
+.hallmark/
+skills-lock.json
+golf_handoff/
+golf_map_offline_LATEST.html

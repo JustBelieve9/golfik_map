@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Граф связей · Golf 7.5 CZCA</title>
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#1b1a17">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231b1a17'/%3E%3Ctext x='16' y='23' font-family='monospace' font-size='18' font-weight='700' text-anchor='middle' fill='%23e8a33d'%3EG%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .gpage { padding: var(--space-lg) var(--space-lg) var(--space-2xl); max-width: 90rem; margin: 0 auto; }
+  .gbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-xs);
+    margin-bottom: var(--space-md);
+  }
+  .gbar .sp { flex: 1; }
+  .gstage {
+    border: var(--rule-hair) solid var(--color-rule);
+    border-radius: var(--radius-lg);
+    background: var(--color-paper-2);
+    overflow: hidden;
+    touch-action: none;
+  }
+  #gsvg { display: block; width: 100%; height: min(78vh, 900px); font-family: var(--font-body); cursor: grab; }
+  #gsvg:active { cursor: grabbing; }
+  #gsvg a { text-decoration: none; }
+  #gstatus {
+    font-family: var(--font-mono); font-size: var(--text-sm); color: var(--color-accent);
+    min-height: 1.6em; margin-top: var(--space-xs);
+  }
+  @media (max-width: 899px) { .gpage { padding: var(--space-md); } }
+</style>
+<script>
+  try {
+    if (localStorage.getItem('golf-theme') === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  } catch (e) {}
+</script>
+</head>
+<body>
+<main class="gpage">
+  <header class="head">
+    <h1>Граф связей</h1>
+    <p class="head__lede">Всё дерево справочника в одном кадре: ветви — иерархия разделов,
+      янтарные дуги через центр — перекрёстные связи (какой предохранитель что питает,
+      какая доработка на чём висит, какая деталь к какому разделу мануала относится).
+      Наведи на узел — останутся только его связи. Клик открывает карточку.</p>
+  </header>
+
+  <div class="gbar">
+    <a class="btn btn--ghost" href="index.html#/">← Справочник</a>
+    <div class="chips" id="glegend"></div>
+    <span class="sp"></span>
+    <button type="button" class="iconbtn" id="gOut" aria-label="Отдалить">−</button>
+    <button type="button" class="iconbtn" id="gIn" aria-label="Приблизить">+</button>
+    <button type="button" class="chip" id="gFit">по размеру</button>
+    <button type="button" class="iconbtn" data-theme-toggle aria-label="Переключить тему">☀</button>
+  </div>
+
+  <div class="gstage"><svg id="gsvg" role="img" aria-label="Радиальный граф связей справочника"></svg></div>
+  <p id="gstatus" role="status" aria-live="polite"></p>
+
+  <footer class="colophon">
+    <p>Радиальная кладограмма: положение узла определяется его местом в дереве, а не физической
+      симуляцией — картинка одинаковая при каждом открытии, по ней можно ориентироваться как по карте.
+      Перекрёстные связи нарисованы пучковыми дугами (bundled edges), поэтому родственные связи идут рядом.
+      Граф есть только в полной версии сайта; в офлайн-файле его нет — он тяжёлый и на телефоне бесполезен.</p>
+  </footer>
+</main>
+
+<script src="assets/d3.v7.min.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/graph.js"></script>
+<script>
+  (function () {
+    var btns = document.querySelectorAll('[data-theme-toggle]');
+    function paint() {
+      var light = document.documentElement.getAttribute('data-theme') === 'light';
+      Array.prototype.forEach.call(btns, function (b) { b.textContent = light ? '☾' : '☀'; });
+    }
+    Array.prototype.forEach.call(btns, function (b) {
+      b.addEventListener('click', function () {
+        var light = document.documentElement.getAttribute('data-theme') === 'light';
+        if (light) document.documentElement.removeAttribute('data-theme');
+        else document.documentElement.setAttribute('data-theme', 'light');
+        try { localStorage.setItem('golf-theme', light ? 'dark' : 'light'); } catch (e) {}
+        paint();
+      });
+    });
+    paint();
+  })();
+</script>
+</body>
+</html>

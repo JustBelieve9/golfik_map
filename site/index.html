@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Golf 7.5 CZCA — справочник по машине</title>
+<meta name="description" content="Справочник по VW Golf 7.5 (BQ12HZ, 1.4 TSI CZCA, DSG-7): блоки управления, предохранители блока C, PR-коды, артикулы ETKA, журнал работ и трат.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#1b1a17">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231b1a17'/%3E%3Ctext x='16' y='23' font-family='monospace' font-size='18' font-weight='700' text-anchor='middle' fill='%23e8a33d'%3EG%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<script>
+  try {
+    if (localStorage.getItem('golf-theme') === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#view">К содержимому</a>
+
+<!-- N3 · side-rail, labelled -->
+<nav class="rail" aria-label="Разделы справочника">
+  <a class="rail__brand" href="#/">
+    <span class="rail__mark">Golf 7.5 <span>·</span> CZCA</span>
+    <span class="rail__vin">WVWZZZAUZKP041455</span>
+  </a>
+  <div class="rail__search" id="railSearch"></div>
+  <div class="rail__nav" id="railNav"></div>
+  <div class="rail__foot">
+    <button type="button" class="iconbtn" data-theme-toggle>☀</button>
+  </div>
+</nav>
+
+<!-- mobile header -->
+<header class="topbar">
+  <div class="topbar__r1">
+    <a class="topbar__mark" href="#/">Golf 7.5 <span>·</span> CZCA</a>
+    <div id="topSearch"></div>
+    <button type="button" class="iconbtn" data-theme-toggle>☀</button>
+  </div>
+  <nav class="tabs" id="tabNav" aria-label="Разделы"></nav>
+</header>
+
+<main class="main">
+  <div class="wrap" id="view" tabindex="-1"></div>
+</main>
+
+<script src="assets/data.js"></script>
+<script>window.GOLF_HAS_GRAPH = true;</script>
+<script src="assets/app.js"></script>
+</body>
+</html>
